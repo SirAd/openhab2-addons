@@ -3,8 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Hue Emulation Service
 Bundle-SymbolicName: org.openhab.io.hueemulation;singleton:=true
 Bundle-Vendor: openHAB
+<<<<<<< HEAD
 Bundle-Version: 2.1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: org.openhab.io.hueemulation.internal.HueActivator
 Bundle-ClassPath: .
 Import-Package: com.google.gson,
  javax.servlet,
@@ -20,6 +22,7 @@ Import-Package: com.google.gson,
  org.eclipse.smarthome.core.thing.binding,
  org.eclipse.smarthome.core.thing.binding.builder,
  org.eclipse.smarthome.core.thing.type,
+ org.eclipse.smarthome.core.transform,
  org.eclipse.smarthome.core.types,
  org.eclipse.smarthome.io.rest,
  org.osgi.framework,
