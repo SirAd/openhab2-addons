@@ -152,8 +152,8 @@ public class HueEmulationServlet extends HttpServlet {
         
         Object translateObj = config.get(CONFIG_TRANSLATION_FILE);
         if (translateObj != null ) {
-        	translationFile = (String) translateObj;
-        	logger.debug("Enable device transformation from {}",translationFile);
+             translationFile = (String) translateObj;
+             logger.debug("Enable device transformation from {}",translationFile);
             transformationService = TransformationHelper
                     .getTransformationService(HueActivator.getContext(), "MAP");
         }
@@ -163,9 +163,9 @@ public class HueEmulationServlet extends HttpServlet {
             useItemNameforTranslation = false;
         } else {
             if (translateNameObj instanceof Boolean) {
-            	useItemNameforTranslation = ((Boolean) translateNameObj).booleanValue();
+                 useItemNameforTranslation = ((Boolean) translateNameObj).booleanValue();
             } else {
-            	useItemNameforTranslation = "true".equalsIgnoreCase((String) translateNameObj);
+                 useItemNameforTranslation = "true".equalsIgnoreCase((String) translateNameObj);
             }
         }
         logger.debug("Item name instead of label will be used for transformation: {}",useItemNameforTranslation);
@@ -540,19 +540,19 @@ public class HueEmulationServlet extends HttpServlet {
             Item item = it.next();
             
             if (transformationService != null) {
-            	String transformationKey = useItemNameforTranslation ? item.getName() : item.getLabel();
+                 String transformationKey = useItemNameforTranslation ? item.getName() : item.getLabel();
                 try {
-					transformedResponse = transformationService.transform(translationFile, transformationKey);
-					if (transformedResponse == null || transformedResponse == "" || transformedResponse.equals(transformationKey)) {
-						transformedResponse = item.getLabel();
-					}
-					logger.debug("Label {} transformed into {}",item.getLabel(),transformedResponse);
-				} catch (TransformationException e) {
-					logger.debug("Exception in transformation for {}",item.getLabel());
-					transformedResponse = item.getLabel();
-				}
+                         transformedResponse = transformationService.transform(translationFile, transformationKey);
+                         if (transformedResponse == null || transformedResponse == "" || transformedResponse.equals(transformationKey)) {
+                              transformedResponse = item.getLabel();
+                         }
+                         logger.debug("Label {} transformed into {}",item.getLabel(),transformedResponse);
+                    } catch (TransformationException e) {
+                         logger.debug("Exception in transformation for {}",item.getLabel());
+                         transformedResponse = item.getLabel();
+                    }
             } else {
-            	transformedResponse = item.getLabel();            	 
+                 transformedResponse = item.getLabel();                  
             }
             
             logger.debug("Put to device names {} , {}",item.getName(), transformedResponse);
@@ -586,19 +586,19 @@ public class HueEmulationServlet extends HttpServlet {
 
         String transformedResponse;
         if (transformationService != null) {
-        	String transformationKey = useItemNameforTranslation ? item.getName() : item.getLabel();
+             String transformationKey = useItemNameforTranslation ? item.getName() : item.getLabel();
             try {
-				transformedResponse = transformationService.transform(translationFile, transformationKey);
-				if (transformedResponse == null || transformedResponse == "" || transformedResponse.equals(transformationKey)) {
-					transformedResponse = item.getLabel();
-				}
-				logger.debug("Label {} transformed into {}",item.getLabel(),transformedResponse);
-			} catch (TransformationException e) {
-				logger.debug("Exception in transformation for {}",item.getLabel());
-				transformedResponse = item.getLabel();
-			}
+                    transformedResponse = transformationService.transform(translationFile, transformationKey);
+                    if (transformedResponse == null || transformedResponse == "" || transformedResponse.equals(transformationKey)) {
+                         transformedResponse = item.getLabel();
+                    }
+                    logger.debug("Label {} transformed into {}",item.getLabel(),transformedResponse);
+               } catch (TransformationException e) {
+                    logger.debug("Exception in transformation for {}",item.getLabel());
+                    transformedResponse = item.getLabel();
+               }
         } else {
-        	transformedResponse = item.getLabel();            	 
+             transformedResponse = item.getLabel();                  
         }
         
         HueDevice d = new HueDevice(hueState, transformedResponse, item.getName());
