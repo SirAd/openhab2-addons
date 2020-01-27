@@ -1,0 +1,21 @@
+Updating from upstream and apply fixes
+
+$ git clone git@github.com:SirAd/openhab2-addons.git
+$ cd openhab2-addons/
+$ git remote add upstream https://github.com/openhab/openhab-addons.git
+$ git fetch --tags upstream
+
+$ git checkout tags/2.2.0
+$ git checkout -b hue_transformation_2.2.0
+
+make changes here
+
+$ git add file1 file2 ...
+$ git commit -m "Change description"
+
+
+Build notes
+
+mvn clean install
+
+Optionally you can skip tests (-DskipTests) or skip some static analysis (-DskipChecks). This does improve the build time but could hide problems in your code. For binding development you want to run that command without skipping checks and tests. To check if your code is following the code style run mvn spotless:check. If Maven prints [INFO] Spotless check skipped then run mvn spotless:check -Dspotless.check.skip=false instead as the check is not mandatory yet. To reformat you code run mvn spotless:apply.

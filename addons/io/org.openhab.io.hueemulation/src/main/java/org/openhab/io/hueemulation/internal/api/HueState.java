@@ -38,6 +38,7 @@ public class HueState {
         super();
         this.on = bri > 0;
         this.bri = bri > 0 ? bri : -1;
+        this.bri = bri > 254 ? 254 : bri;
     }
 
     public HueState(int h, short s, short b) {
@@ -45,14 +46,14 @@ public class HueState {
         this.on = b > 0;
         this.hue = h;
         this.sat = s;
-        this.bri = b;
+	this.bri = b > 254 ? 254 : b;
     }
 
     public HueState(HSBType hsb) {
         this.on = hsb.getBrightness().intValue() > 0;
         this.hue = hsb.getHue().intValue();
         this.sat = hsb.getSaturation().shortValue();
-        this.bri = hsb.intValue() > 0 ? (short) ((hsb.intValue() * 255) / 100) : -1;
+        this.bri = hsb.intValue() > 0 ? (short) ((hsb.intValue() * 254) / 100) : -1;
     }
 
     /**

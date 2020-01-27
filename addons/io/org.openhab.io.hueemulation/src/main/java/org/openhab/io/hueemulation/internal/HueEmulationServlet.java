@@ -45,6 +45,9 @@ import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.HSBType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.transform.TransformationException;
+import org.eclipse.smarthome.core.transform.TransformationHelper;
+import org.eclipse.smarthome.core.transform.TransformationService;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.TypeParser;
@@ -77,6 +80,8 @@ public class HueEmulationServlet extends HttpServlet {
     private static final String CONFIG_PAIRING_ENABLED = "pairingEnabled";
     private static final String CONFIG_DISCOVERY_IP = "discoveryIp";
     private static final String CONFIG_DISCOVERY_HTTP_PORT = "discoveryHttpPort";
+    private static final String CONFIG_TRANSLATION_FILE = "translationFile";
+    private static final String CONFIG_TRANSLATION_ITEMNAME = "useItemNameForTranslation";
     private static final String PATH = "/api";
     private static final String METHOD_POST = "POST";
     private static final String METHOD_PUT = "PUT";
@@ -105,6 +110,9 @@ public class HueEmulationServlet extends HttpServlet {
     private List<String> userNames = new ArrayList<>();
     // deviceMap maps a Hue numeric id to a Item Name, ordered by that id
     private TreeMap<Integer, String> deviceMap = new TreeMap<>();
+    private boolean useItemNameforTranslation = false;
+    String translationFile = null;
+    TransformationService transformationService = null;
 
     protected void activate(Map<String, Object> config) {
         modified(config);
@@ -173,6 +181,27 @@ public class HueEmulationServlet extends HttpServlet {
             }
         }
         logger.debug("Device pairing enabled : {}", pairingEnabled);
+        
+        Object translateObj = config.get(CONFIG_TRANSLATION_FILE);
+        if (translateObj != null ) {
+             translationFile = (String) translateObj;
+             logger.debug("Enable device transformation from {}",translationFile);
+            transformationService = TransformationHelper
+                    .getTransformationService(HueActivator.getContext(), "MAP");
+        }
+        
+        Object translateNameObj = config.get(CONFIG_TRANSLATION_ITEMNAME);
+        if (translateNameObj == null) {
+            useItemNameforTranslation = false;
+        } else {
+            if (translateNameObj instanceof Boolean) {
+                 useItemNameforTranslation = ((Boolean) translateNameObj).booleanValue();
+            } else {
+                 useItemNameforTranslation = "true".equalsIgnoreCase((String) translateNameObj);
+            }
+        }
+        logger.debug("Item name instead of label will be used for transformation: {}",useItemNameforTranslation);
+        
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -475,16 +504,33 @@ public class HueEmulationServlet extends HttpServlet {
             HSBType color = (HSBType) itemState;
             hueState = new HueState(color);
         } else if (itemState instanceof DecimalType) {
-            short bri = (short) ((((DecimalType) itemState).intValue() * 255) / 100);
+            short bri = (short) ((((DecimalType) itemState).intValue() * 254) / 100);
             hueState = new HueState(bri);
         } else if (itemState instanceof OnOffType) {
-            short bri = (short) (((OnOffType) itemState) == OnOffType.ON ? 255 : 0);
+            short bri = (short) (((OnOffType) itemState) == OnOffType.ON ? 254 : 0);
             hueState = new HueState(bri);
         } else {
             hueState = new HueState((short) 0);
         }
 
-        HueDevice d = new HueDevice(hueState, item.getLabel(), key);
+        String transformedResponse;
+        if (transformationService != null) {
+             String transformationKey = useItemNameforTranslation ? item.getName() : item.getLabel();
+            try {
+                    transformedResponse = transformationService.transform(translationFile, transformationKey);
+                    if (transformedResponse == null || transformedResponse == "" || transformedResponse.equals(transformationKey)) {
+                         transformedResponse = item.getLabel();
+                    }
+                    logger.debug("Label {} transformed into {}",item.getLabel(),transformedResponse);
+               } catch (TransformationException e) {
+                    logger.debug("Exception in transformation for {}",item.getLabel());
+                    transformedResponse = item.getLabel();
+               }
+        } else {
+             transformedResponse = item.getLabel();                  
+        }
+        
+        HueDevice d = new HueDevice(hueState, transformedResponse, key);
         return d;
     }
 
